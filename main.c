@@ -43,30 +43,29 @@ void *parse_packet(int fd) {
 
 		case 0x02: // Handshake
 			buf_len = parse_string16(fd, buf);
-			printf("%s\n", buf);
-			exit(0);
-			break;
-
 	}
 
-	// while () {
+	void *out = malloc(buf_len);
+	memcpy(out, buf, buf_len);
 
-	// 	for (int i = 0; i < sizeof(buffer); i++)
-	// 		printf("%02x.", (unsigned int) buffer[i]);
-	// 	printf("\n");
-	// 	bzero(buffer, sizeof(buffer));
-	// }
+	return out;
 }
 
 void client(int fd) {
 
-	printf("Client connected.\n");
-
 	// Handshake
-	parse_packet(fd);
+	const char *username = parse_packet(fd);
+
+	printf("Client %s connected.\n", username);
+
 	send_packet(fd, 2, "\0\1\0-", 4); // UTF16 string prefixed with its length (2 bytes)
 
-	printf("Client disconnected.\n");
+	// Login
+
+	// disconnect
+	printf("Client %s disconnected.\n", username);
+
+	free(username);
 }
 
 int main() {
