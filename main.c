@@ -3,7 +3,7 @@
 typedef struct {
 
 	int fd;
-	CtoS_Handshake *handshake; // idc rn
+	char username[16]; // I don't think this accounts for the \0 lol
 
 } Client;
 
@@ -11,7 +11,7 @@ typedef struct {
 #define MAX_PLAYER_COUNT 100
 
 Client *clients[MAX_PLAYER_COUNT];
-struct pollfd fds[MAX_PLAYER_COUNT];
+struct pollfd client_fds[MAX_PLAYER_COUNT];
 
 void add_client(int fd) {
 
@@ -22,9 +22,15 @@ void add_client(int fd) {
 	Client *client = malloc(sizeof(Client));
 	client->fd = fd;
 
-	client->handshake = parse_packet(fd);
+	{
+		CtoS_Handshake *handshake = parse_packet(fd);
 
-	printf("Client %s connected.\n", client->handshake->username);
+		memcpy(client->username, handshake->username, 16);
+
+		free_packet(handshake);
+	}
+
+	printf("Client %s connected.\n", client->username);
 
 	// initialize Client/player
 	StoC_Handshake handshake = { PID_HANDSHAKE };
@@ -41,8 +47,8 @@ void add_client(int fd) {
 
 		if (clients[i] == NULL) {
 
-			clients[i]    = client;
-			fds[i].fd     = fd;
+			clients[i]       = client;
+			client_fds[i].fd = fd;
 			break;
 		}
 	}
@@ -52,13 +58,12 @@ void remove_client(int index) {
 
 	close(clients[index]->fd);
 
-	printf("Client %s disconnected.\n", clients[index]->handshake->username);
+	printf("Client %s disconnected.\n", clients[index]->username);
 
-	free_packet(clients[index]->handshake);
 	free(clients[index]);
 
-	clients[index] = NULL;
-	fds[index].fd  = -1;
+	clients[index]        = NULL;
+	client_fds[index].fd  = -1;
 }
 
 void *client_processing_thread_routine(void *server_fd) {
@@ -67,8 +72,8 @@ void *client_processing_thread_routine(void *server_fd) {
 
 	for (int i = 0; i < MAX_PLAYER_COUNT; i++) {
 
-		fds[i].fd     = -1;
-		fds[i].events = POLLIN;
+		client_fds[i].fd     = -1;
+		client_fds[i].events = POLLIN;
 	}
 
 	while (1) {
@@ -80,17 +85,17 @@ void *client_processing_thread_routine(void *server_fd) {
 			add_client(client_fd);
 
 		// process all connected clients
-		if (poll(fds, MAX_PLAYER_COUNT, 0) != 0) {
+		if (poll(client_fds, MAX_PLAYER_COUNT, 0) != 0) {
 
 			for (int i = 0; i < MAX_PLAYER_COUNT; i++) {
 
-				if (fds[i].revents & POLLIN) {
+				if (client_fds[i].revents & POLLIN) {
 
 					// data received
 					parse_packet(clients[i]->fd);
 				}
 
-				if (fds[i].revents & (POLLERR | POLLHUP)) {
+				if (client_fds[i].revents & (POLLERR | POLLHUP)) {
 
 					// socket was closed
 					remove_client(i);
