@@ -61,7 +61,9 @@ void remove_client(int index) {
 	fds[index].fd  = -1;
 }
 
-int main() {
+void *client_processing_thread_routine(void *server_fd) {
+
+	// pthread_exit(), pthread_join(), pthread_mutex_t, pthread_mutex_lock(), pthread_mutex_unlock(), pthread_cond_t, pthread_cond_wait(), pthread_cond_signal()
 
 	for (int i = 0; i < MAX_PLAYER_COUNT; i++) {
 
@@ -69,6 +71,40 @@ int main() {
 		fds[i].events = POLLIN;
 	}
 
+	while (1) {
+
+		// accept any new clients
+		int client_fd = accept(*(int *) server_fd, NULL, NULL);
+
+		if (client_fd != -1)
+			add_client(client_fd);
+
+		// process all connected clients
+		if (poll(fds, MAX_PLAYER_COUNT, 0) != 0) {
+
+			for (int i = 0; i < MAX_PLAYER_COUNT; i++) {
+
+				if (fds[i].revents & POLLIN) {
+
+					// data received
+					parse_packet(clients[i]->fd);
+				}
+
+				if (fds[i].revents & (POLLERR | POLLHUP)) {
+
+					// socket was closed
+					remove_client(i);
+				}
+			}
+		}
+	}
+
+	return NULL;
+}
+
+int main() {
+
+	// create server socket
 	int server_fd = socket(AF_INET, SOCK_STREAM, 0);
 
 	// make socket non-blocking
@@ -95,33 +131,18 @@ int main() {
 
 	printf("Server initialized.\n");
 
+	// create the client processing thread
+	pthread_t client_processing_thread;
+
+	if (pthread_create(&client_processing_thread, NULL, client_processing_thread_routine, &server_fd)) {
+
+		printf("Failed to create client processing thread.\n");
+		exit(1);
+	}
+
 	// main loop
 	while (1) {
 
-		// accept any new clients
-		int client_fd = accept(server_fd, NULL, NULL);
-
-		if (client_fd != -1)
-			add_client(client_fd);
-
-		// process all connected clients
-		while (poll(fds, MAX_PLAYER_COUNT, 0) != 0) {
-
-			for (int i = 0; i < MAX_PLAYER_COUNT; i++) {
-
-				if (fds[i].revents & POLLIN) {
-
-					// data received
-					parse_packet(clients[i]->fd);
-				}
-
-				if (fds[i].revents & (POLLERR | POLLHUP)) {
-
-					// socket was closed
-					remove_client(i);
-				}
-			}
-		}
 	}
 
 	// shutdown(server_fd, SHUT_RDWR);
