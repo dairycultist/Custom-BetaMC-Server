@@ -3,7 +3,7 @@
 typedef struct {
 
 	int fd;
-	char username[16]; // I don't think this accounts for the \0 lol
+	char username[17];
 
 } Client;
 
@@ -25,7 +25,7 @@ void add_client(int fd) {
 	{
 		CtoS_Handshake *handshake = parse_packet(fd);
 
-		memcpy(client->username, handshake->username, 16);
+		memcpy(client->username, handshake->username, 17);
 
 		free_packet(handshake);
 	}
@@ -150,6 +150,7 @@ int main() {
 
 	}
 
+	// remember to pthread_exit the client_processing_thread (although technically not necessary since it'll exit when we exit)
 	// shutdown(server_fd, SHUT_RDWR);
 	// close(server_fd);
 

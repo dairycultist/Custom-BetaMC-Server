@@ -31,7 +31,7 @@ typedef struct {
 } StoC_Handshake;
 typedef struct {
 	p_id packet_id;
-	char username[16];
+	char username[17]; // usernames can be up to 16 characters + \0
 } CtoS_Handshake;
 
 #define PID_PLAYER_POS_AND_LOOK 0x0D
