@@ -34,6 +34,6 @@ typedef struct {
 
 void send_packet(int fd, void *packet);
 void *parse_packet(int fd);
-// free_packet
+void free_packet(void *packet);
 
 #endif

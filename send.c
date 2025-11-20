@@ -1,7 +1,7 @@
 #include "packet.h"
 
 // takes in an ASCII-encoded string and sends it as a UTF16-encoded string
-void send_string16(int fd, char *msg) {
+static void send_string16(int fd, char *msg) {
 
 	static const char zero[1] = {0};
 
