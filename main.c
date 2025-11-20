@@ -1,11 +1,25 @@
 #include "packet.h"
 
-void client(int fd) {
+typedef struct {
+
+	int fd;
+	CtoS_Handshake *handshake; // idc rn
+
+} Client;
+
+Client *init_client(int fd) {
+
+	// ensure client file descriptor is blocking (unlike server)
+	fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) & ~O_NONBLOCK);
+
+	// create Client object
+	Client *client = malloc(sizeof(Client));
+	client->fd = fd;
 
 	// Handshake
-	CtoS_Handshake *handshake = parse_packet(fd);
+	client->handshake = parse_packet(fd);
 
-	printf("Client %s connected.\n", handshake->username);
+	printf("Client %s connected.\n", client->handshake->username);
 
 	{
 		StoC_Handshake ret = { PID_HANDSHAKE };
@@ -18,26 +32,34 @@ void client(int fd) {
 		send_packet(fd, &ret);
 	}
 
-	// idk
+	// Initialize player
 	{
 		CtoS_PlayerPosAndLook ret = { PID_PLAYER_POS_AND_LOOK };
 		send_packet(fd, &ret);
 	}
 
-	// while (1) {
-	// 	parse_packet(fd);
-	// }
+	return client;
+}
+
+void destroy_client(Client *client) {
 
 	// disconnect
-	printf("Client %s disconnected.\n", handshake->username);
+	// TODO in the final implementation, remove the client from the static client list
+	close(client->fd);
 
-	free_packet(handshake);
+	printf("Client %s disconnected.\n", client->handshake->username);
+
+	free_packet(client->handshake);
 }
 
 int main() {
 
 	int server_fd = socket(AF_INET, SOCK_STREAM, 0);
 
+	// make socket non-blocking
+	fcntl(server_fd, F_SETFL, fcntl(server_fd, F_GETFL, 0) | O_NONBLOCK);
+
+	// initialize server information
 	{
 		struct sockaddr_in server_addr;
 
@@ -58,22 +80,22 @@ int main() {
 
 	printf("Server initialized.\n");
 
+	// main loop
 	while (1) {
 
+		// accept any new clients
 		int client_fd = accept(server_fd, NULL, NULL);
 
-		pid_t pid = fork();
+		if (client_fd != -1) {
 
-		if (pid < 0) {
+			Client *client = init_client(client_fd);
 
-			printf("Fork failed.\n");
-
-		} else if (pid == 0) {
-
-			client(client_fd); // getpid(), getppid()
-			close(client_fd);
-			exit(0);
+			// TODO add to list of clients
 		}
+
+		// process all connected clients
+
+		// destroy_client(client);
 	}
 
 	// shutdown(server_fd, SHUT_RDWR);
