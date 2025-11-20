@@ -34,7 +34,7 @@ void send_packet(int fd, void *packet) {
 			break;
 
 		case PID_HANDSHAKE:
-			send_string16(fd, ((StoC_Handshake *) packet)->connection_hash);
+			send_string16(fd, "-");
 			break;
 	}
 }

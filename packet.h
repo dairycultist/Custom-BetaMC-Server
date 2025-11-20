@@ -24,12 +24,11 @@ typedef struct {
 
 #define PID_HANDSHAKE 0x02
 typedef struct {
-	p_id packet_id;
-	char *connection_hash;
+	p_id packet_id; // since connection hash is always "-", there's no field for it here
 } StoC_Handshake;
 typedef struct {
 	p_id packet_id;
-	char *username;
+	char username[16];
 } CtoS_Handshake;
 
 void send_packet(int fd, void *packet);

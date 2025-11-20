@@ -1,9 +1,7 @@
-.PHONY: run
+.PHONY: run clean
 
 a.out: *.c *.h
 	@gcc *.c
-
-# server_app next
 
 run: a.out
 	@./a.out

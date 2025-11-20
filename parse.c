@@ -31,7 +31,6 @@ void *parse_packet(int fd) {
 			CtoS_Handshake *out = malloc(sizeof(CtoS_Handshake));
 
 			out->packet_id = PID_HANDSHAKE;
-			out->username = malloc(128);
 
 			parse_string16(fd, out->username);
 

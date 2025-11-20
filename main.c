@@ -8,7 +8,7 @@ void client(int fd) {
 	printf("Client %s connected.\n", handshake->username);
 
 	{
-		StoC_Handshake ret = { PID_HANDSHAKE, "-" };
+		StoC_Handshake ret = { PID_HANDSHAKE };
 		send_packet(fd, &ret);
 	}
 
@@ -21,7 +21,7 @@ void client(int fd) {
 	// disconnect
 	printf("Client %s disconnected.\n", handshake->username);
 
-	free(handshake);
+	free_packet(handshake);
 }
 
 int main() {
