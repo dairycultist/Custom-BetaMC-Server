@@ -7,8 +7,10 @@ void client(int fd) {
 
 	printf("Client %s connected.\n", handshake->username);
 
-	StoC_Handshake ret = { PID_HANDSHAKE, "\0\1\0-" };
-	send_packet(fd, &ret);
+	{
+		StoC_Handshake ret = { PID_HANDSHAKE, "-" };
+		send_packet(fd, &ret);
+	}
 
 	// Login
 

@@ -1,18 +1,33 @@
 #include "packet.h"
 
+// takes in an ASCII-encoded string and sends it as a UTF16-encoded string
+void send_string16(int fd, char *msg) {
+
+	static const char zero[1] = {0};
+
+	uint16_t length = strlen(msg);
+
+	length = __builtin_bswap16(length);
+	write(fd, &length, 2);
+	length = __builtin_bswap16(length);
+	
+	for (int i = 0; i < length; i++) {
+
+		write(fd, zero, 1);
+		write(fd, msg + i, 1);
+	}
+}
+
 void send_packet(int fd, void *packet) {
 
-	// write packet ID header
+	// write header (packet ID)
 	write(fd, (p_id *) packet, 1);
 
+	// write packet body based on packet ID
 	switch (*(p_id *) packet) {
 
 		case PID_HANDSHAKE: {
-			write(
-				fd,
-				((StoC_Handshake *) packet)->connection_hash,
-				strlen(((StoC_Handshake *) packet)->connection_hash)
-			);
+			send_string16(fd, ((StoC_Handshake *) packet)->connection_hash);
 			break;
 		}
 	}

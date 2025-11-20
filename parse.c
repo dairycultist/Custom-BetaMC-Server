@@ -1,6 +1,7 @@
 #include "packet.h"
 
-static uint16_t parse_string16(int fd, char *out) { // UTF16-encoded string prefixed with its length (2 bytes)
+// parses a UTF16-encoded string (prefixed with its length, 2 bytes) into an ASCII-encoded string (null-terminated)
+static uint16_t parse_string16(int fd, char *out) {
 
 	uint16_t length;
 	read(fd, &length, 2);
