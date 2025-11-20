@@ -18,6 +18,16 @@ void client(int fd) {
 		send_packet(fd, &ret);
 	}
 
+	// idk
+	{
+		CtoS_PlayerPosAndLook ret = { PID_PLAYER_POS_AND_LOOK };
+		send_packet(fd, &ret);
+	}
+
+	// while (1) {
+	// 	parse_packet(fd);
+	// }
+
 	// disconnect
 	printf("Client %s disconnected.\n", handshake->username);
 
@@ -36,12 +46,12 @@ int main() {
 		server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
 
 		if (bind(server_fd, (struct sockaddr *) &server_addr, sizeof(server_addr))) {
-			perror("Failed to bind.\n");
+			printf("Failed to bind.\n");
 			exit(errno);
 		}
 
 		if (listen(server_fd, 99)) {
-			perror("Failed to listen.\n");
+			printf("Failed to listen.\n");
 			exit(errno);
 		}
 	}
@@ -56,7 +66,7 @@ int main() {
 
 		if (pid < 0) {
 
-			perror("Fork failed.\n");
+			printf("Fork failed.\n");
 
 		} else if (pid == 0) {
 

@@ -36,5 +36,13 @@ void send_packet(int fd, void *packet) {
 		case PID_HANDSHAKE:
 			send_string16(fd, "-");
 			break;
+		
+		case PID_PLAYER_POS_AND_LOOK:
+			write(fd, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", 41);
+			break;
+		
+		default:
+			printf("Packet ID 0x%02x not configured for sending!\n", *(p_id *) packet);
+			break;
 	}
 }

@@ -36,7 +36,9 @@ void *parse_packet(int fd) {
 
 			return out;
 		}
-	}
 
-	return NULL;
+		default:
+			printf("Packet ID 0x%02x not configured for parsing! Future packets will be malformed!\n", packet_id);
+			return NULL;
+	}
 }

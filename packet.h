@@ -31,6 +31,11 @@ typedef struct {
 	char username[16];
 } CtoS_Handshake;
 
+#define PID_PLAYER_POS_AND_LOOK 0x0D
+typedef struct {
+	p_id packet_id; // no fields yet because I just want this to work and floats are weird
+} CtoS_PlayerPosAndLook;
+
 void send_packet(int fd, void *packet);
 void *parse_packet(int fd);
 void free_packet(void *packet);
