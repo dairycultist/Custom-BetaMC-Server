@@ -1,11 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
-#include <unistd.h>
-#include <errno.h>
-
-#include <arpa/inet.h>
+#include "packet.h"
 
 void send_packet(int fd, unsigned char packet_id, char *data, size_t data_len) {
 
@@ -13,23 +6,21 @@ void send_packet(int fd, unsigned char packet_id, char *data, size_t data_len) {
 	write(fd, data, data_len);
 }
 
-#include "parse.c"
-
 void client(int fd) {
 
 	// Handshake
-	char *username = parse_packet(fd);
+	CtoS_Handshake *handshake = parse_packet(fd);
 
-	printf("Client %s connected.\n", username);
+	printf("Client %s connected.\n", handshake->username);
 
-	send_packet(fd, 2, "\0\1\0-", 4);
+	send_packet(fd, PID_HANDSHAKE, "\0\1\0-", 4);
 
 	// Login
 
 	// disconnect
-	printf("Client %s disconnected.\n", username);
+	printf("Client %s disconnected.\n", handshake->username);
 
-	free(username);
+	free(handshake);
 }
 
 int main() {

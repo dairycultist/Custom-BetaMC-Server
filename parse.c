@@ -1,4 +1,6 @@
-uint16_t parse_string16(int fd, char *out) { // UTF16-encoded string prefixed with its length (2 bytes)
+#include "packet.h"
+
+static uint16_t parse_string16(int fd, char *out) { // UTF16-encoded string prefixed with its length (2 bytes)
 
 	uint16_t length;
 	read(fd, &length, 2);
@@ -15,23 +17,26 @@ uint16_t parse_string16(int fd, char *out) { // UTF16-encoded string prefixed wi
 	return length + 1;
 }
 
-// reads and returns exactly one packet (I'll probably separate this into a separate file later)
+// reads and returns exactly one packet
 void *parse_packet(int fd) {
 	
 	unsigned char packet_id;
 	read(fd, &packet_id, 1);
 
-	char buf[128];
-	uint16_t buf_len;
-
 	switch (packet_id) {
 
-		case 0x02: // Handshake
-			buf_len = parse_string16(fd, buf);
+		case PID_HANDSHAKE: { // Handshake
+
+			CtoS_Handshake *out = malloc(sizeof(CtoS_Handshake));
+
+			out->packet_id = PID_HANDSHAKE;
+			out->username = malloc(128);
+
+			parse_string16(fd, out->username);
+
+			return out;
+		}
 	}
 
-	void *out = malloc(buf_len);
-	memcpy(out, buf, buf_len);
-
-	return out;
+	return NULL;
 }
