@@ -13,6 +13,10 @@ void client(int fd) {
 	}
 
 	// Login
+	{
+		StoC_Login ret = { PID_LOGIN, 0, 0, 0 };
+		send_packet(fd, &ret);
+	}
 
 	// disconnect
 	printf("Client %s disconnected.\n", handshake->username);
