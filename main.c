@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
@@ -12,22 +13,58 @@ void send_packet(int fd, unsigned char packet_id, char *data, size_t data_len) {
 	write(fd, data, data_len);
 }
 
+uint16_t parse_string16(int fd, char *out) {
+
+	uint16_t length;
+	read(fd, &length, 2);
+	length = __builtin_bswap16(length);
+
+	for (int i = 0; i < length; i++) {
+
+		read(fd, out + i, 1); // have to discard the first byte somehow
+		read(fd, out + i, 1);
+	}
+
+	out[length] = '\0';
+
+	return length + 1;
+}
+
+// reads and returns exactly one packet (I'll probably separate this into a separate file later)
+void *parse_packet(int fd) {
+	
+	unsigned char packet_id;
+	read(fd, &packet_id, 1);
+
+	char buf[128];
+	uint16_t buf_len;
+
+	switch (packet_id) {
+
+		case 0x02: // Handshake
+			buf_len = parse_string16(fd, buf);
+			printf("%s\n", buf);
+			exit(0);
+			break;
+
+	}
+
+	// while () {
+
+	// 	for (int i = 0; i < sizeof(buffer); i++)
+	// 		printf("%02x.", (unsigned int) buffer[i]);
+	// 	printf("\n");
+	// 	bzero(buffer, sizeof(buffer));
+	// }
+}
+
 void client(int fd) {
 
 	printf("Client connected.\n");
 
+	// Handshake
+	parse_packet(fd);
 	send_packet(fd, 2, "\0\1\0-", 4); // UTF16 string prefixed with its length (2 bytes)
-
-	// TODO packet parser
-	char buffer[32] = {0};
-	
-	while (read(fd, buffer, sizeof(buffer) - 1)) {
-
-		for (int i = 0; i < sizeof(buffer); i++)
-			printf("%02x.", (unsigned int) buffer[i]);
-		printf("\n");
-		bzero(buffer, sizeof(buffer));
-	}
 
 	printf("Client disconnected.\n");
 }
