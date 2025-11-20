@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <poll.h>
 
 #include <arpa/inet.h>
 
