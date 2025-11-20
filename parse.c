@@ -20,7 +20,7 @@ static uint16_t parse_string16(int fd, char *out) { // UTF16-encoded string pref
 // reads and returns exactly one packet
 void *parse_packet(int fd) {
 	
-	unsigned char packet_id;
+	p_id packet_id;
 	read(fd, &packet_id, 1);
 
 	switch (packet_id) {

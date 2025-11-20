@@ -1,11 +1,5 @@
 #include "packet.h"
 
-void send_packet(int fd, unsigned char packet_id, char *data, size_t data_len) {
-
-	write(fd, &packet_id, 1);
-	write(fd, data, data_len);
-}
-
 void client(int fd) {
 
 	// Handshake
@@ -13,7 +7,8 @@ void client(int fd) {
 
 	printf("Client %s connected.\n", handshake->username);
 
-	send_packet(fd, PID_HANDSHAKE, "\0\1\0-", 4);
+	StoC_Handshake ret = { PID_HANDSHAKE, "\0\1\0-" };
+	send_packet(fd, &ret);
 
 	// Login
 
