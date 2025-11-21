@@ -47,6 +47,10 @@ void add_client(int fd) {
 	packet.floats[1] = 0; // pitch
 	send_packet(fd, &packet);
 
+	packet.id = PID_SET_HEALTH;
+	packet.int16s[0] = 10; // health
+	send_packet(fd, &packet);
+
 	// parse incoming login packet
 	parse_packet(fd, &packet);
 

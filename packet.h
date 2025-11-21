@@ -19,6 +19,7 @@ typedef unsigned char p_id;
 
 #define PID_LOGIN 0x01
 #define PID_HANDSHAKE 0x02
+#define PID_SET_HEALTH 0x08
 #define PID_PLAYER_POS_AND_LOOK 0x0D
 
 typedef struct {
@@ -26,7 +27,7 @@ typedef struct {
 	p_id id;
 
 	int8_t int8s[1]; // also act as bools
-	// int16_t int16s[1];
+	int16_t int16s[1];
 	int32_t int32s[1];
 	int64_t int64s[1];
 	float floats[2]; // 32-bit

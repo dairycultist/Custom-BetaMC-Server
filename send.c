@@ -71,6 +71,10 @@ void send_packet(int fd, const Packet *packet) {
 		case PID_HANDSHAKE:
 			send_string16(fd, "-");
 			break;
+
+		case PID_SET_HEALTH:
+			send_int16(fd, packet->int16s[0]);
+			break;
 		
 		case PID_PLAYER_POS_AND_LOOK:
 			send_double(fd, packet->doubles[0]); // X
