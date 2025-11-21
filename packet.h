@@ -19,6 +19,7 @@ typedef unsigned char p_id;
 
 #define PID_LOGIN 0x01
 #define PID_HANDSHAKE 0x02
+#define PID_TIME 0x04
 #define PID_SET_HEALTH 0x08
 #define PID_PLAYER_POS_AND_LOOK 0x0D
 
