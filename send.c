@@ -75,6 +75,12 @@ void send_packet(int fd, const Packet *packet) {
 		case PID_TIME:
 			send_int64(fd, packet->int64s[0]); 		// time
 			break;
+		
+		case PID_SPAWN_POINT:
+			send_int32(fd, packet->int32s[0]); 		// X
+			send_int32(fd, packet->int32s[1]); 		// Y
+			send_int32(fd, packet->int32s[2]); 		// Z
+			break;
 
 		case PID_SET_HEALTH:
 			send_int16(fd, packet->int16s[0]); 		// health

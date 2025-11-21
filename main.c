@@ -38,13 +38,10 @@ void add_client(int fd) {
 	packet.int64s[0] = 0; // world seed
 	send_packet(fd, &packet);
 
-	packet.id = PID_PLAYER_POS_AND_LOOK;
-	packet.doubles[0] = 0; // X
-	packet.doubles[1] = 64; // Y
-	packet.doubles[2] = 0; // stance
-	packet.doubles[3] = 0; // Z
-	packet.floats[0] = 0; // yaw
-	packet.floats[1] = 0; // pitch
+	packet.id = PID_SPAWN_POINT;
+	packet.int32s[0] = 0; // X
+	packet.int32s[1] = 64; // Y
+	packet.int32s[2] = 0; // Z
 	send_packet(fd, &packet);
 
 	packet.id = PID_TIME;
@@ -53,6 +50,15 @@ void add_client(int fd) {
 
 	packet.id = PID_SET_HEALTH;
 	packet.int16s[0] = 20; // health
+	send_packet(fd, &packet);
+
+	packet.id = PID_PLAYER_POS_AND_LOOK;
+	packet.doubles[0] = 0; // X
+	packet.doubles[1] = 64; // Y
+	packet.doubles[2] = 0; // stance
+	packet.doubles[3] = 0; // Z
+	packet.floats[0] = 0; // yaw
+	packet.floats[1] = 0; // pitch
 	send_packet(fd, &packet);
 
 	// parse incoming login packet
