@@ -24,10 +24,27 @@ static uint16_t parse_string16(int fd, char *out) {
 	return length + 1;
 }
 
-void parse_int32(int fd, int32_t *out) {
+static void parse_int64(int fd, int64_t *out) {
+	
+	read(fd, out, 8);
+	*out = __builtin_bswap64(*out);
+}
+
+static void parse_int32(int fd, int32_t *out) {
 	
 	read(fd, out, 4);
 	*out = __builtin_bswap32(*out);
+}
+
+static void parse_int16(int fd, int16_t *out) {
+	
+	read(fd, out, 2);
+	*out = __builtin_bswap16(*out);
+}
+
+static void parse_int8(int fd, int8_t *out) {
+	
+	read(fd, out, 1);
 }
 
 // reads and returns exactly one packet
@@ -43,8 +60,8 @@ void parse_packet(int fd, Packet *packet_out) {
 		case PID_LOGIN:
 			parse_int32(fd, &packet_out->int32s[0]); 		// protocol version
 			parse_string16(fd, packet_out->strings[0]); 	// username
-			read(fd, &packet_out->int64s[0], 8); 			// unused
-			read(fd, &packet_out->int8s[0], 1); 			// unused
+			parse_int64(fd, &packet_out->int64s[0]); 		// unused
+			parse_int8(fd, &packet_out->int8s[0]); 			// unused
 			break;
 
 		case PID_HANDSHAKE:

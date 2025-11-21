@@ -25,14 +25,8 @@ void add_client(int fd) {
 	client->fd = fd;
 
 	// parse incoming handshake
-	{
-
-		parse_packet(fd, &packet);
-
-		memcpy(client->username, packet.strings[0], 17);
-	}
-
-	printf("Client %s connected.\n", client->username);
+	parse_packet(fd, &packet);
+	memcpy(client->username, packet.strings[0], 17);
 
 	// initialize Client/player
 	packet.id = PID_HANDSHAKE;
@@ -47,9 +41,10 @@ void add_client(int fd) {
 	packet.id = PID_PLAYER_POS_AND_LOOK;
 	send_packet(fd, &packet);
 
-	// drop the incoming login packet since we don't need anything in it
+	// parse incoming login packet
 	parse_packet(fd, &packet);
-	printf("Protocol: %d\n", packet.int32s[0]);
+
+	printf("Client %s connected (protocol %d).\n", client->username, packet.int32s[0]);
 
 	// find a space to insert the client
 	for (int i = 0; i < MAX_PLAYER_COUNT; i++) {

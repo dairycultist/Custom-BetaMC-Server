@@ -18,6 +18,29 @@ static void send_string16(int fd, char *msg) {
 	}
 }
 
+static void send_int64(int fd, int64_t msg) {
+
+	msg = __builtin_bswap64(msg);
+	write(fd, &msg, 8);
+}
+
+static void send_int32(int fd, int32_t msg) {
+
+	msg = __builtin_bswap32(msg);
+	write(fd, &msg, 4);
+}
+
+static void send_int16(int fd, int16_t msg) {
+
+	msg = __builtin_bswap16(msg);
+	write(fd, &msg, 2);
+}
+
+static void send_int8(int fd, int8_t msg) {
+
+	write(fd, &msg, 1);
+}
+
 void send_packet(int fd, const Packet *packet) {
 
 	// write header (packet ID)
@@ -27,10 +50,10 @@ void send_packet(int fd, const Packet *packet) {
 	switch (packet->id) {
 
 		case PID_LOGIN:
-			write(fd, &packet->int32s[0], 4); // entity id // might have to flip endianness of numericals idc rn
+			send_int32(fd, packet->int32s[0]); 		// entity id // might have to flip endianness of numericals idc rn
 			send_string16(fd, "");
-			write(fd, &packet->int64s[0], 8); // world seed
-			write(fd, &packet->int8s[0], 1); // dimension
+			send_int64(fd, packet->int64s[0]); 		// world seed
+			send_int8(fd, packet->int8s[0]);	 	// dimension
 			break;
 
 		case PID_HANDSHAKE:

@@ -25,7 +25,8 @@ typedef struct {
 
 	p_id id;
 
-	char int8s[1];
+	int8_t int8s[1];
+	// int16_t int16s[1];
 	int32_t int32s[1];
 	int64_t int64s[1];
 	char strings[1][MAX_STRING_LENGTH_CHARS + 1];
