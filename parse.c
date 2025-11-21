@@ -24,25 +24,25 @@ static uint16_t parse_string16(int fd, char *out) {
 	return length + 1;
 }
 
-static void parse_int64(int fd, int64_t *out) {
+static inline void parse_int64(int fd, int64_t *out) {
 	
 	read(fd, out, 8);
 	*out = __builtin_bswap64(*out);
 }
 
-static void parse_int32(int fd, int32_t *out) {
+static inline void parse_int32(int fd, int32_t *out) {
 	
 	read(fd, out, 4);
 	*out = __builtin_bswap32(*out);
 }
 
-static void parse_int16(int fd, int16_t *out) {
+static inline void parse_int16(int fd, int16_t *out) {
 	
 	read(fd, out, 2);
 	*out = __builtin_bswap16(*out);
 }
 
-static void parse_int8(int fd, int8_t *out) {
+static inline void parse_int8(int fd, int8_t *out) {
 	
 	read(fd, out, 1);
 }
