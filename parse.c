@@ -24,6 +24,12 @@ static uint16_t parse_string16(int fd, char *out) {
 	return length + 1;
 }
 
+void parse_int32(int fd, int32_t *out) {
+	
+	read(fd, out, 4);
+	*out = __builtin_bswap32(*out);
+}
+
 // reads and returns exactly one packet
 void parse_packet(int fd, Packet *packet_out) {
 	
@@ -34,12 +40,16 @@ void parse_packet(int fd, Packet *packet_out) {
 
 	switch (packet_id) {
 
-		case PID_HANDSHAKE: { // Handshake
-
-			parse_string16(fd, packet_out->strings[0]);
-
+		case PID_LOGIN:
+			parse_int32(fd, &packet_out->int32s[0]); 		// protocol version
+			parse_string16(fd, packet_out->strings[0]); 	// username
+			read(fd, &packet_out->int64s[0], 8); 			// unused
+			read(fd, &packet_out->int8s[0], 1); 			// unused
 			break;
-		}
+
+		case PID_HANDSHAKE:
+			parse_string16(fd, packet_out->strings[0]); 	// username
+			break;
 
 		default:
 			printf("Packet ID 0x%02x not configured for parsing! Future packets will be malformed!\n", packet_id);

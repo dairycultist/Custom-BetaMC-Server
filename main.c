@@ -15,6 +15,8 @@ struct pollfd client_fds[MAX_PLAYER_COUNT];
 
 void add_client(int fd) {
 
+	Packet packet;
+
 	// ensure client file descriptor is blocking (unlike server)
 	fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) & ~O_NONBLOCK);
 
@@ -24,31 +26,30 @@ void add_client(int fd) {
 
 	// parse incoming handshake
 	{
-		Packet cts_packet;
 
-		parse_packet(fd, &cts_packet);
+		parse_packet(fd, &packet);
 
-		memcpy(client->username, cts_packet.strings[0], 17);
+		memcpy(client->username, packet.strings[0], 17);
 	}
 
 	printf("Client %s connected.\n", client->username);
 
 	// initialize Client/player
-	{
-		Packet stc_packet;
+	packet.id = PID_HANDSHAKE;
+	send_packet(fd, &packet);
 
-		stc_packet.id = PID_HANDSHAKE;
-		send_packet(fd, &stc_packet);
+	packet.id = PID_LOGIN;
+	packet.int8s[0] = 0; // dimension
+	packet.int32s[0] = 0; // entity id
+	packet.int64s[0] = 0; // world seed
+	send_packet(fd, &packet);
 
-		stc_packet.id = PID_LOGIN;
-		stc_packet.int8s[0] = 0; // dimension
-		stc_packet.int32s[0] = 0; // entity id
-		stc_packet.int64s[0] = 0; // world seed
-		send_packet(fd, &stc_packet);
+	packet.id = PID_PLAYER_POS_AND_LOOK;
+	send_packet(fd, &packet);
 
-		stc_packet.id = PID_PLAYER_POS_AND_LOOK;
-		send_packet(fd, &stc_packet);
-	}
+	// drop the incoming login packet since we don't need anything in it
+	parse_packet(fd, &packet);
+	printf("Protocol: %d\n", packet.int32s[0]);
 
 	// find a space to insert the client
 	for (int i = 0; i < MAX_PLAYER_COUNT; i++) {
