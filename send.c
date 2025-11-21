@@ -18,6 +18,18 @@ static void send_string16(int fd, char *msg) {
 	}
 }
 
+static inline void send_double(int fd, double msg) {
+
+	msg = __builtin_bswap64(msg);
+	write(fd, &msg, 8);
+}
+
+static inline void send_float(int fd, float msg) {
+
+	msg = __builtin_bswap32(msg);
+	write(fd, &msg, 4);
+}
+
 static inline void send_int64(int fd, int64_t msg) {
 
 	msg = __builtin_bswap64(msg);
@@ -61,7 +73,13 @@ void send_packet(int fd, const Packet *packet) {
 			break;
 		
 		case PID_PLAYER_POS_AND_LOOK:
-			write(fd, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", 41);
+			send_double(fd, packet->doubles[0]); // X
+			send_double(fd, packet->doubles[1]); // Y
+			send_double(fd, packet->doubles[2]); // stance
+			send_double(fd, packet->doubles[3]); // Z
+			send_float(fd, packet->floats[0]); // yaw
+			send_float(fd, packet->floats[1]); // pitch
+			send_int8(fd, packet->int8s[0]); // on ground (unused?)
 			break;
 		
 		default:

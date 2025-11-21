@@ -39,6 +39,12 @@ void add_client(int fd) {
 	send_packet(fd, &packet);
 
 	packet.id = PID_PLAYER_POS_AND_LOOK;
+	packet.doubles[0] = 0; // X
+	packet.doubles[1] = 64; // Y
+	packet.doubles[2] = 0; // stance
+	packet.doubles[3] = 0; // Z
+	packet.floats[0] = 0; // yaw
+	packet.floats[1] = 0; // pitch
 	send_packet(fd, &packet);
 
 	// parse incoming login packet
