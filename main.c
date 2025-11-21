@@ -102,7 +102,7 @@ void *client_processing_thread_routine(void *server_fd) {
 				if (client_fds[i].revents & POLLIN) {
 
 					// data received
-					// parse_packet(clients[i]->fd, &cts_packet);
+					parse_packet(clients[i]->fd, &cts_packet);
 
 					// TODO do stuff with received packet based on id
 				}

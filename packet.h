@@ -13,7 +13,7 @@
 
 #include <arpa/inet.h>
 
-#include "packet.h"
+#define MAX_STRING_LENGTH_CHARS 255
 
 typedef unsigned char p_id;
 
@@ -28,7 +28,7 @@ typedef struct {
 	char int8s[1];
 	int32_t int32s[1];
 	int64_t int64s[1];
-	char strings[1][256];
+	char strings[1][MAX_STRING_LENGTH_CHARS + 1];
 
 } Packet; // basically the union of all packets' possible fields
 
