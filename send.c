@@ -18,19 +18,19 @@ static void send_string16(int fd, char *msg) {
 	}
 }
 
-void send_packet(int fd, void *packet) {
+void send_packet(int fd, const Packet *packet) {
 
 	// write header (packet ID)
-	write(fd, (p_id *) packet, 1);
+	write(fd, &packet->id, 1);
 
 	// write packet body based on packet ID
-	switch (*(p_id *) packet) {
+	switch (packet->id) {
 
 		case PID_LOGIN:
-			write(fd, &((StoC_Login *) packet)->entity_id, 4); // might have to flip endianness of numericals idc rn
+			write(fd, &packet->int32s[0], 4); // entity id // might have to flip endianness of numericals idc rn
 			send_string16(fd, "");
-			write(fd, &((StoC_Login *) packet)->world_seed, 8);
-			write(fd, &((StoC_Login *) packet)->dimension, 1);
+			write(fd, &packet->int64s[0], 8); // world seed
+			write(fd, &packet->int8s[0], 1); // dimension
 			break;
 
 		case PID_HANDSHAKE:

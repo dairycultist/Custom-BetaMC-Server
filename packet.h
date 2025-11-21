@@ -18,29 +18,21 @@
 typedef unsigned char p_id;
 
 #define PID_LOGIN 0x01
-typedef struct {
-	p_id packet_id;
-	int32_t entity_id;
-	int64_t world_seed;
-	char dimension;
-} StoC_Login;
-
 #define PID_HANDSHAKE 0x02
-typedef struct {
-	p_id packet_id; // since connection hash is always "-", there's no field for it here
-} StoC_Handshake;
-typedef struct {
-	p_id packet_id;
-	char username[17]; // usernames can be up to 16 characters + \0
-} CtoS_Handshake;
-
 #define PID_PLAYER_POS_AND_LOOK 0x0D
-typedef struct {
-	p_id packet_id; // no fields yet because I just want this to work and floats are weird
-} CtoS_PlayerPosAndLook;
 
-void send_packet(int fd, void *packet);
-void *parse_packet(int fd);
-void free_packet(void *packet);
+typedef struct {
+
+	p_id id;
+
+	char int8s[1];
+	int32_t int32s[1];
+	int64_t int64s[1];
+	char strings[1][256];
+
+} Packet; // basically the union of all packets' possible fields
+
+void send_packet(int fd, const Packet *packet);
+void parse_packet(int fd, Packet *packet_out);
 
 #endif

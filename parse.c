@@ -19,26 +19,24 @@ static uint16_t parse_string16(int fd, char *out) {
 }
 
 // reads and returns exactly one packet
-void *parse_packet(int fd) {
+void parse_packet(int fd, Packet *packet_out) {
 	
 	p_id packet_id;
 	read(fd, &packet_id, 1);
+
+	packet_out->id = packet_id;
 
 	switch (packet_id) {
 
 		case PID_HANDSHAKE: { // Handshake
 
-			CtoS_Handshake *out = malloc(sizeof(CtoS_Handshake));
+			parse_string16(fd, packet_out->strings[0]);
 
-			out->packet_id = PID_HANDSHAKE;
-
-			parse_string16(fd, out->username);
-
-			return out;
+			break;
 		}
 
 		default:
 			printf("Packet ID 0x%02x not configured for parsing! Future packets will be malformed!\n", packet_id);
-			return NULL;
+			break;
 	}
 }

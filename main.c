@@ -22,25 +22,33 @@ void add_client(int fd) {
 	Client *client = malloc(sizeof(Client));
 	client->fd = fd;
 
+	// parse incoming handshake
 	{
-		CtoS_Handshake *handshake = parse_packet(fd);
+		Packet cts_packet;
 
-		memcpy(client->username, handshake->username, 17);
+		parse_packet(fd, &cts_packet);
 
-		free_packet(handshake);
+		memcpy(client->username, cts_packet.strings[0], 17);
 	}
 
 	printf("Client %s connected.\n", client->username);
 
 	// initialize Client/player
-	StoC_Handshake handshake = { PID_HANDSHAKE };
-	send_packet(fd, &handshake);
+	{
+		Packet stc_packet;
 
-	StoC_Login login = { PID_LOGIN, 0, 0, 0 };
-	send_packet(fd, &login);
+		stc_packet.id = PID_HANDSHAKE;
+		send_packet(fd, &stc_packet);
 
-	CtoS_PlayerPosAndLook pal = { PID_PLAYER_POS_AND_LOOK };
-	send_packet(fd, &pal);
+		stc_packet.id = PID_LOGIN;
+		stc_packet.int8s[0] = 0; // dimension
+		stc_packet.int32s[0] = 0; // entity id
+		stc_packet.int64s[0] = 0; // world seed
+		send_packet(fd, &stc_packet);
+
+		stc_packet.id = PID_PLAYER_POS_AND_LOOK;
+		send_packet(fd, &stc_packet);
+	}
 
 	// find a space to insert the client
 	for (int i = 0; i < MAX_PLAYER_COUNT; i++) {
@@ -76,6 +84,8 @@ void *client_processing_thread_routine(void *server_fd) {
 		client_fds[i].events = POLLIN;
 	}
 
+	Packet cts_packet;
+
 	while (1) {
 
 		// accept any new clients
@@ -92,7 +102,9 @@ void *client_processing_thread_routine(void *server_fd) {
 				if (client_fds[i].revents & POLLIN) {
 
 					// data received
-					parse_packet(clients[i]->fd);
+					// parse_packet(clients[i]->fd, &cts_packet);
+
+					// TODO do stuff with received packet based on id
 				}
 
 				if (client_fds[i].revents & (POLLERR | POLLHUP)) {
