@@ -95,6 +95,12 @@ void send_packet(int fd, const Packet *packet) {
 			send_float(fd, packet->floats[1]); 		// pitch
 			send_int8(fd, packet->int8s[0]); 		// on ground (unused?)
 			break;
+
+		case PID_PRECHUNK:
+			send_int32(fd, packet->int32s[0]); 		// X
+			send_int32(fd, packet->int32s[1]); 		// Z
+			send_int8(fd, packet->int8s[0]); 		// load
+			break;
 		
 		default:
 			printf("Packet ID 0x%02x not configured for sending!\n", *(p_id *) packet);

@@ -61,6 +61,13 @@ void add_client(int fd) {
 	packet.floats[1] = 0; // pitch
 	send_packet(fd, &packet);
 
+	// send chunk data
+	packet.id = PID_PRECHUNK;
+	packet.int32s[0] = 0; // X
+	packet.int32s[1] = 0; // Z
+	packet.int8s[0] = 1; // load
+	send_packet(fd, &packet);
+
 	// parse incoming login packet
 	parse_packet(fd, &packet);
 
