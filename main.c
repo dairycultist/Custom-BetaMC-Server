@@ -44,6 +44,7 @@ static void add_client(int fd) {
 static void remove_client(int index) {
 
 	// TODO once linked list is implemented, make sure we place a mutex lock on the client list while removing
+	// pthread_mutex_t, pthread_mutex_lock(), pthread_mutex_unlock()
 
 	close(clients[index]->fd);
 
@@ -56,8 +57,6 @@ static void remove_client(int index) {
 }
 
 static void *client_processing_thread_routine(void *server_fd) {
-
-	// pthread_exit(), pthread_join(), pthread_mutex_t, pthread_mutex_lock(), pthread_mutex_unlock(), pthread_cond_t, pthread_cond_wait(), pthread_cond_signal()
 
 	for (int i = 0; i < MAX_PLAYER_COUNT; i++) {
 
@@ -119,12 +118,12 @@ int main() {
 
 		if (bind(server_fd, (struct sockaddr *) &server_addr, sizeof(server_addr))) {
 			printf("Failed to bind.\n");
-			exit(errno);
+			return errno;
 		}
 
 		if (listen(server_fd, 99)) {
 			printf("Failed to listen.\n");
-			exit(errno);
+			return errno;
 		}
 	}
 
@@ -136,7 +135,7 @@ int main() {
 	if (pthread_create(&client_processing_thread, NULL, client_processing_thread_routine, &server_fd)) {
 
 		printf("Failed to create client processing thread.\n");
-		exit(1);
+		return 1;
 	}
 
 	// main loop
