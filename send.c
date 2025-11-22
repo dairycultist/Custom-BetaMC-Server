@@ -89,7 +89,7 @@ void send_packet(int fd, const Packet *packet) {
 		case PID_PLAYER_POS_AND_LOOK:
 			send_double(fd, packet->doubles[0]); 	// X
 			send_double(fd, packet->doubles[1]); 	// Y
-			send_double(fd, packet->doubles[2]); 	// stance
+			send_double(fd, packet->doubles[2]); 	// camera Y / stance
 			send_double(fd, packet->doubles[3]); 	// Z
 			send_float(fd, packet->floats[0]); 		// yaw
 			send_float(fd, packet->floats[1]); 		// pitch

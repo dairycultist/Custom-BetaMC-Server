@@ -7,7 +7,7 @@
 static Client *clients[MAX_PLAYER_COUNT];
 static struct pollfd client_fds[MAX_PLAYER_COUNT];
 
-void add_client(int fd) {
+static void add_client(int fd) {
 
 	// ensure client file descriptor is blocking (unlike server)
 	fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) & ~O_NONBLOCK);
@@ -41,7 +41,7 @@ void add_client(int fd) {
 	}
 }
 
-void remove_client(int index) {
+static void remove_client(int index) {
 
 	close(clients[index]->fd);
 
@@ -53,7 +53,7 @@ void remove_client(int index) {
 	client_fds[index].fd  = -1;
 }
 
-void *client_processing_thread_routine(void *server_fd) {
+static void *client_processing_thread_routine(void *server_fd) {
 
 	// pthread_exit(), pthread_join(), pthread_mutex_t, pthread_mutex_lock(), pthread_mutex_unlock(), pthread_cond_t, pthread_cond_wait(), pthread_cond_signal()
 
@@ -63,7 +63,7 @@ void *client_processing_thread_routine(void *server_fd) {
 		client_fds[i].events = POLLIN;
 	}
 
-	Packet cts_packet;
+	Packet packet;
 
 	while (1) {
 
@@ -81,14 +81,14 @@ void *client_processing_thread_routine(void *server_fd) {
 				if (client_fds[i].revents & POLLIN) {
 
 					// packet received
-					parse_packet(clients[i]->fd, &cts_packet);
+					parse_packet(clients[i]->fd, &packet);
 
-					process_client_packet(clients[i], &cts_packet);
+					process_client_packet(clients[i], &packet);
 				}
 
 				if (client_fds[i].revents & (POLLERR | POLLHUP)) {
 
-					// socket was closed
+					// client socket was closed
 					remove_client(i);
 				}
 			}

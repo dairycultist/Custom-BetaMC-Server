@@ -24,6 +24,18 @@ static uint16_t parse_string16(int fd, char *out) {
 	return length + 1;
 }
 
+static inline void parse_double(int fd, double *out) {
+
+	read(fd, out, 8);
+	*out = __builtin_bswap64(*out);
+}
+
+static inline void parse_float(int fd, float *out) {
+
+	read(fd, out, 4);
+	*out = __builtin_bswap32(*out);
+}
+
 static inline void parse_int64(int fd, int64_t *out) {
 	
 	read(fd, out, 8);
@@ -66,6 +78,24 @@ void parse_packet(int fd, Packet *packet_out) {
 
 		case PID_HANDSHAKE:
 			parse_string16(fd, packet_out->strings[0]); 	// username
+			break;
+
+		case PID_PLAYER_POS:
+			parse_double(fd, &packet_out->doubles[0]); 		// X
+			parse_double(fd, &packet_out->doubles[1]); 		// Y
+			parse_double(fd, &packet_out->doubles[2]); 		// camera Y / stance
+			parse_double(fd, &packet_out->doubles[3]); 		// Z
+			parse_int8(fd, &packet_out->int8s[0]); 			// on ground
+			break;
+
+		case PID_PLAYER_POS_AND_LOOK:
+			parse_double(fd, &packet_out->doubles[0]); 		// X
+			parse_double(fd, &packet_out->doubles[1]); 		// Y
+			parse_double(fd, &packet_out->doubles[2]); 		// camera Y / stance
+			parse_double(fd, &packet_out->doubles[3]); 		// Z
+			parse_float(fd, &packet_out->floats[0]); 		// yaw
+			parse_float(fd, &packet_out->floats[1]); 		// pitch
+			parse_int8(fd, &packet_out->int8s[0]); 			// on ground
 			break;
 
 		default:

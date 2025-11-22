@@ -23,6 +23,7 @@ typedef unsigned char p_id;
 #define PID_TIME 0x04
 #define PID_SPAWN_POINT 0x06
 #define PID_SET_HEALTH 0x08
+#define PID_PLAYER_POS 0x0B
 #define PID_PLAYER_POS_AND_LOOK 0x0D
 #define PID_PRECHUNK 0x32
 
