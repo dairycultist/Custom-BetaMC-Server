@@ -1,4 +1,16 @@
-#include "packet.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <string.h>
+#include <unistd.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <poll.h>
+#include <pthread.h>
+// libdeflate.h
+
+#include <arpa/inet.h>
+
 #include "logic.h"
 
 // a non-void function returns 0 if everything is good, otherwise returns
@@ -67,7 +79,8 @@ int init_client(Client *client) {
 
 int process_client_packet(Client *client, const Packet *packet) { // TODO take in array list of clients
 
-	// use packet ID!
+	if (packet->id == PID_DISCONNECT)
+		return 1;
 
 	return 0;
 }

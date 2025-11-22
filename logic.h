@@ -1,6 +1,8 @@
 #ifndef LOGIC_H
 #define LOGIC_H
 
+#include "packet.h"
+
 typedef struct {
 
 	int fd;

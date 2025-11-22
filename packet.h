@@ -1,19 +1,6 @@
 #ifndef PACKET_H
 #define PACKET_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
-#include <unistd.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <poll.h>
-#include <pthread.h>
-// libdeflate.h
-
-#include <arpa/inet.h>
-
 #define MAX_STRING_LENGTH_CHARS 255
 
 typedef unsigned char p_id;
@@ -26,6 +13,7 @@ typedef unsigned char p_id;
 #define PID_PLAYER_POS 0x0B
 #define PID_PLAYER_POS_AND_LOOK 0x0D
 #define PID_PRECHUNK 0x32
+#define PID_DISCONNECT 0xFF
 
 typedef struct {
 

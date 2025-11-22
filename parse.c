@@ -1,3 +1,16 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <string.h>
+#include <unistd.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <poll.h>
+#include <pthread.h>
+// libdeflate.h
+
+#include <arpa/inet.h>
+
 #include "packet.h"
 
 // parses a UTF16-encoded string (prefixed with its length, 2 bytes) into an ASCII-encoded string (null-terminated)
@@ -96,6 +109,10 @@ void parse_packet(int fd, Packet *packet_out) {
 			parse_float(fd, &packet_out->floats[0]); 		// yaw
 			parse_float(fd, &packet_out->floats[1]); 		// pitch
 			parse_int8(fd, &packet_out->int8s[0]); 			// on ground
+			break;
+		
+		case PID_DISCONNECT:
+			parse_string16(fd, packet_out->strings[0]); 	// reason
 			break;
 
 		default:

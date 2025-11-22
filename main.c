@@ -1,4 +1,16 @@
-#include "packet.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <string.h>
+#include <unistd.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <poll.h>
+#include <pthread.h>
+// libdeflate.h
+
+#include <arpa/inet.h>
+
 #include "logic.h"
 
 // TODO replace with a linked list instead of a static array
