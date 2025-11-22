@@ -7,22 +7,11 @@ typedef struct {
 
 } Client;
 
-// temp maybe
-#define MAX_PLAYER_COUNT 100
+void init_client(Client *client) {
 
-Client *clients[MAX_PLAYER_COUNT];
-struct pollfd client_fds[MAX_PLAYER_COUNT];
-
-void add_client(int fd) {
+	int fd = client->fd;
 
 	Packet packet;
-
-	// ensure client file descriptor is blocking (unlike server)
-	fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) & ~O_NONBLOCK);
-
-	// create Client object
-	Client *client = malloc(sizeof(Client));
-	client->fd = fd;
 
 	// parse incoming handshake
 	parse_packet(fd, &packet);
@@ -55,7 +44,7 @@ void add_client(int fd) {
 	packet.id = PID_PLAYER_POS_AND_LOOK;
 	packet.doubles[0] = 0; // X
 	packet.doubles[1] = 64; // Y
-	packet.doubles[2] = 0; // stance
+	packet.doubles[2] = 1.62; // stance
 	packet.doubles[3] = 0; // Z
 	packet.floats[0] = 0; // yaw
 	packet.floats[1] = 0; // pitch
@@ -72,6 +61,33 @@ void add_client(int fd) {
 	parse_packet(fd, &packet);
 
 	printf("Client %s connected (protocol %d).\n", client->username, packet.int32s[0]);
+}
+
+void process_client_packet(Client *client, Packet *packet) {
+
+}
+
+void process_loop() {
+
+}
+
+// temp maybe
+#define MAX_PLAYER_COUNT 100
+
+Client *clients[MAX_PLAYER_COUNT];
+struct pollfd client_fds[MAX_PLAYER_COUNT];
+
+void add_client(int fd) {
+
+	// ensure client file descriptor is blocking (unlike server)
+	fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) & ~O_NONBLOCK);
+
+	// create Client object
+	Client *client = malloc(sizeof(Client));
+	client->fd = fd;
+
+	// send all the relevant stuff to the client
+	init_client(client);
 
 	// find a space to insert the client
 	for (int i = 0; i < MAX_PLAYER_COUNT; i++) {
@@ -182,7 +198,7 @@ int main() {
 
 	// main loop
 	while (1) {
-
+		process_loop();
 	}
 
 	// remember to pthread_exit the client_processing_thread (although technically not necessary since it'll exit when we exit)
