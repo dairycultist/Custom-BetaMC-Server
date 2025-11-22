@@ -1,81 +1,11 @@
 #include "packet.h"
+#include "logic.h"
 
-typedef struct {
-
-	int fd;
-	char username[17];
-
-} Client;
-
-void init_client(Client *client) {
-
-	int fd = client->fd;
-
-	Packet packet;
-
-	// parse incoming handshake
-	parse_packet(fd, &packet);
-	memcpy(client->username, packet.strings[0], 17);
-
-	// initialize Client/player
-	packet.id = PID_HANDSHAKE;
-	send_packet(fd, &packet);
-
-	packet.id = PID_LOGIN;
-	packet.int8s[0] = 0; // dimension
-	packet.int32s[0] = 0; // entity id
-	packet.int64s[0] = 0; // world seed
-	send_packet(fd, &packet);
-
-	packet.id = PID_SPAWN_POINT;
-	packet.int32s[0] = 0; // X
-	packet.int32s[1] = 64; // Y
-	packet.int32s[2] = 0; // Z
-	send_packet(fd, &packet);
-
-	packet.id = PID_TIME;
-	packet.int64s[0] = 18000; // time
-	send_packet(fd, &packet);
-
-	packet.id = PID_SET_HEALTH;
-	packet.int16s[0] = 20; // health
-	send_packet(fd, &packet);
-
-	packet.id = PID_PLAYER_POS_AND_LOOK;
-	packet.doubles[0] = 0; // X
-	packet.doubles[1] = 64; // Y
-	packet.doubles[2] = 1.62; // stance
-	packet.doubles[3] = 0; // Z
-	packet.floats[0] = 0; // yaw
-	packet.floats[1] = 0; // pitch
-	send_packet(fd, &packet);
-
-	// send chunk data
-	packet.id = PID_PRECHUNK;
-	packet.int32s[0] = 0; // X
-	packet.int32s[1] = 0; // Z
-	packet.int8s[0] = 1; // load
-	send_packet(fd, &packet);
-
-	// parse incoming login packet
-	parse_packet(fd, &packet);
-
-	printf("Client %s connected (protocol %d).\n", client->username, packet.int32s[0]);
-}
-
-void process_client_packet(Client *client, Packet *packet) {
-
-}
-
-void process_loop() {
-
-}
-
-// temp maybe
+// TODO replace with a linked list instead of a static array
 #define MAX_PLAYER_COUNT 100
 
-Client *clients[MAX_PLAYER_COUNT];
-struct pollfd client_fds[MAX_PLAYER_COUNT];
+static Client *clients[MAX_PLAYER_COUNT];
+static struct pollfd client_fds[MAX_PLAYER_COUNT];
 
 void add_client(int fd) {
 
@@ -87,7 +17,17 @@ void add_client(int fd) {
 	client->fd = fd;
 
 	// send all the relevant stuff to the client
-	init_client(client);
+	if (init_client(client) != 0) {
+
+		printf("A client attempted to connect, but failed!\n");
+
+		close(fd);
+		free(client);
+
+		return;
+	}
+
+	printf("Client %s connected.\n", client->username);
 
 	// find a space to insert the client
 	for (int i = 0; i < MAX_PLAYER_COUNT; i++) {
@@ -140,10 +80,10 @@ void *client_processing_thread_routine(void *server_fd) {
 
 				if (client_fds[i].revents & POLLIN) {
 
-					// data received
+					// packet received
 					parse_packet(clients[i]->fd, &cts_packet);
 
-					// TODO do stuff with received packet based on id
+					process_client_packet(clients[i], &cts_packet);
 				}
 
 				if (client_fds[i].revents & (POLLERR | POLLHUP)) {
