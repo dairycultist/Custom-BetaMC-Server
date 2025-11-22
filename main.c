@@ -43,6 +43,8 @@ static void add_client(int fd) {
 
 static void remove_client(int index) {
 
+	// TODO once linked list is implemented, make sure we place a mutex lock on the client list while removing
+
 	close(clients[index]->fd);
 
 	printf("Client %s disconnected.\n", clients[index]->username);
@@ -74,23 +76,24 @@ static void *client_processing_thread_routine(void *server_fd) {
 			add_client(client_fd);
 
 		// process all connected clients
-		if (poll(client_fds, MAX_PLAYER_COUNT, 0) != 0) {
+		if (poll(client_fds, MAX_PLAYER_COUNT, 0) == 0)
+			continue;
 
-			for (int i = 0; i < MAX_PLAYER_COUNT; i++) {
+		for (int i = 0; i < MAX_PLAYER_COUNT; i++) {
 
-				if (client_fds[i].revents & POLLIN) {
+			if (client_fds[i].revents & POLLIN) {
 
-					// packet received
-					parse_packet(clients[i]->fd, &packet);
+				// packet received
+				parse_packet(clients[i]->fd, &packet);
 
-					process_client_packet(clients[i], &packet);
-				}
+				if (process_client_packet(clients[i], &packet) != 0)
+					remove_client(i); // processor requested we kick the player
+			}
 
-				if (client_fds[i].revents & (POLLERR | POLLHUP)) {
+			if (client_fds[i].revents & (POLLERR | POLLHUP)) {
 
-					// client socket was closed
-					remove_client(i);
-				}
+				// client socket was closed
+				remove_client(i);
 			}
 		}
 	}
@@ -138,6 +141,7 @@ int main() {
 
 	// main loop
 	while (1) {
+
 		process_loop();
 	}
 

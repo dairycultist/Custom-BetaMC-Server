@@ -10,6 +10,6 @@ typedef struct {
 
 int init_client(Client *client);
 int process_client_packet(Client *client, const Packet *packet);
-int process_loop();
+void process_loop();
 
 #endif

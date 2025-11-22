@@ -1,7 +1,9 @@
 #include "packet.h"
 #include "logic.h"
 
-// all these functions return 0 if everything is good, otherwise return non-zero to indicate the client should be removed from the client list
+// a non-void function returns 0 if everything is good, otherwise returns
+// non-zero to indicate the client should be removed from the client list
+// (i.e. because it sent an invalid packet)
 
 int init_client(Client *client) {
 
@@ -9,6 +11,10 @@ int init_client(Client *client) {
 
 	// parse incoming handshake
 	parse_packet(client->fd, &packet);
+
+	if (packet.id != PID_HANDSHAKE)
+		return 1;
+
 	memcpy(client->username, packet.strings[0], 17);
 
 	// send initialization packets
@@ -50,8 +56,11 @@ int init_client(Client *client) {
 	packet.int8s[0] = 1; // load
 	send_packet(client->fd, &packet);
 
-	// parse incoming login packet (nothing we need is in it, so we just ignore the contents)
+	// parse incoming login packet
 	parse_packet(client->fd, &packet);
+
+	if (packet.id != PID_LOGIN)
+		return 1;
 
 	return 0;
 }
@@ -63,7 +72,6 @@ int process_client_packet(Client *client, const Packet *packet) { // TODO take i
 	return 0;
 }
 
-int process_loop() { // TODO take in array list of clients
+void process_loop() { // TODO take in array list of clients
 
-	return 0;
 }
